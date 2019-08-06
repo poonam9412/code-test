@@ -4,20 +4,12 @@ import { AppState } from '../features/redux/state/appState'
 import { connect } from "react-redux";
 import {dashBoardAction} from '../features/redux/action/dashboard'
 import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
-import Input from '@material-ui/core/Input';
-import InputBase from '@material-ui/core/InputBase';
 import InputLabel from '@material-ui/core/InputLabel';
 import TextField from '@material-ui/core/TextField';
 import FormControl from '@material-ui/core/FormControl';
-import Button from '@material-ui/core/Button';
-import Drawer from '@material-ui/core/Drawer';
-import List from '@material-ui/core/List';
-import IconButton from "@material-ui/core/IconButton"
-import Divider from '@material-ui/core/Divider';
 import InputAdornment from '@material-ui/core/InputAdornment'
 
 const styles = theme => ({
@@ -86,10 +78,6 @@ function TabContainer(props) {
     </Typography>
   );
 }
-
-// TabContainer.propTypes = {
-//   children: PropTypes.node.isRequired,
-// };
 
 type PropsWithStyles = WithStyles<"root" | "flex" | "menuButton" | "button" | "appbarColor" | "list" | "fullList" | "avatar" | "icon" | "borderStyle" | "bootstrapFormLabel" | "row" | "column">;
 class UserDashBoard extends React.Component<PropsWithStyles & dashBoardProps>{
