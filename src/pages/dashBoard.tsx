@@ -2,7 +2,7 @@ import * as React from "react";
 import { withStyles, WithStyles } from '@material-ui/core/styles';
 import { AppState } from '../features/redux/state/appState'
 import { connect } from "react-redux";
-import {dashBoardAction} from '../features/redux/action/dashboard'
+import { dashBoardAction } from '../features/redux/action/dashboard'
 import AppBar from '@material-ui/core/AppBar';
 import Typography from '@material-ui/core/Typography';
 import Tabs from '@material-ui/core/Tabs';
@@ -46,22 +46,22 @@ const styles = theme => ({
     width: 'auto',
   },
   borderStyle: {
-    border: "solid 1px grey"
+    border: "solid 1px grey",
   },
   bootstrapFormLabel: {
     fontSize: 18,
-  }, 
+  },
   row: {
     '&:nth-of-type(odd)': {
       backgroundColor: theme.palette.background.default,
-    }   
+    }
   },
-  column:{
+  column: {
     backgroundColor: "rgba(0, 102, 204, 0.1)"
   }
 });
 const style = {
-  borderStyle : {
+  borderStyle: {
     borderStyle: "none",
     backgroundColor: "rgba(0, 102, 204,0)"
   }
@@ -82,13 +82,46 @@ function TabContainer(props) {
 type PropsWithStyles = WithStyles<"root" | "flex" | "menuButton" | "button" | "appbarColor" | "list" | "fullList" | "avatar" | "icon" | "borderStyle" | "bootstrapFormLabel" | "row" | "column">;
 class UserDashBoard extends React.Component<PropsWithStyles & dashBoardProps>{
   state = {
-    value: 0
+    value: 0,
+    bidData: []
   }
   componentDidMount() {
     this.props.dispatch(dashBoardAction())
   }
+
+  componentWillUpdate(nextProps) {
+    const dashboard = this.props.dashboard
+    if (this.props.dashboard) {
+      if (nextProps.dashboard !== dashboard && nextProps.dashboard.dashBoard !== dashboard.dashBoard && nextProps.dashboard.dashBoard && nextProps.dashboard.dashBoard.bid) {
+        this.setState({
+          bidData: nextProps.dashboard.dashBoard && nextProps.dashboard.dashBoard.bid
+        })
+      }
+    }
+  }
+
+  handleChange = (e,value) => {
+    this.setState({
+      value
+    })
+  }
+
+  handlePriceChange = (id) => (event) => {
+    const bidPrice = this.props.dashboard.dashBoard && this.props.dashboard.dashBoard.bid
+    const updatedPrice = (bidPrice || []).map((value, i) => {
+      if (value.id === id) {
+        return { ...value, price: event.target.value }
+      }
+      else {
+        return value
+      }
+    })
+    this.setState({
+      bidData: updatedPrice
+    })
+  }
+
   render() {
-    const { dashBoard } = this.props.dashboard
     const dashBoardDATA = <FormControl>
       <InputLabel shrink htmlFor="bootstrap-input" className={this.props.classes.bootstrapFormLabel} >
         Amount
@@ -102,7 +135,7 @@ class UserDashBoard extends React.Component<PropsWithStyles & dashBoardProps>{
         }}
       />
     </FormControl>
-    const Data = <FormControl>
+    const priceInput = <FormControl>
       <InputLabel shrink htmlFor="bootstrap-input" className={this.props.classes.bootstrapFormLabel} >
         Price
   </InputLabel>
@@ -115,6 +148,17 @@ class UserDashBoard extends React.Component<PropsWithStyles & dashBoardProps>{
         }}
       />
     </FormControl>
+
+    const orderBook = (this.state.bidData || []).map((e, i) => {
+      const usdValue = e.price ? ((e.price * 0.14).toFixed(2)) : 0;
+      return (<div className={`flex items-center pointer ${this.props.classes.row}`} key={i}>
+        <div className="w-50 justify-center flex">{e.amount}</div>
+        <div className={`w-50 flex flex-column ${this.props.classes.column}`}>
+          <div className={`flex`}><input type="number" name="fname" defaultValue={`${e.price}`} style={style.borderStyle} onChange={this.handlePriceChange(e.id)} /></div>
+          <div className="pt2 flex">USD {usdValue}</div></div>
+      </div>)
+    })
+
     return (
       <div className={this.props.classes.root}>
         <AppBar position="sticky" className={this.props.classes.appbarColor}>
@@ -152,8 +196,8 @@ class UserDashBoard extends React.Component<PropsWithStyles & dashBoardProps>{
             <div className={`flex items-center flex-column w-100`}>
               <AppBar position="static" color="default">
                 <Tabs
-                  value={0}
-                  //  onChange={this.handleChange}
+                  value={this.state.value}
+                  onChange={this.handleChange}
                   indicatorColor="primary"
                   textColor="primary"
                   variant="fullWidth"
@@ -163,26 +207,21 @@ class UserDashBoard extends React.Component<PropsWithStyles & dashBoardProps>{
                 </Tabs>
               </AppBar>
               {this.state.value === 0 && <TabContainer>
-              {dashBoardDATA}
-              {Data}</TabContainer>}
-              {this.state.value === 1 && <TabContainer>Sell</TabContainer>}
-            </div>
-            <div>
-              <div>Order Summary</div>
+                {dashBoardDATA}
+                {priceInput}
+                <div>
+                  <div>Order Summary</div>
+                </div>
+              </TabContainer>}
+              {this.state.value === 1 && <TabContainer>You haven't sold anything!!!!</TabContainer>}
             </div>
           </div>
           <div className={`flex flex-column w-40 ${this.props.classes.borderStyle}`}>
             <div className={`flex items-center pt2`}>
-            <div className="w-50 justify-center flex">Amount</div>
-                <div className="w-50  flex">Price</div> 
+              <div className="w-50 justify-center flex">Amount</div>
+              <div className="w-50  flex">Price</div>
             </div>
-            { this.props.dashboard.dashBoard && dashBoard.bid.map((e,i)=>{
-            return (<div className={`flex items-center pointer ${this.props.classes.row}`} key={i}>
-                <div className="w-50 justify-center flex">{e.amount}</div>
-                <div className={`w-50 flex flex-column ${this.props.classes.column}`}>
-                  <div className={`flex`}><input type="number" name="fname" defaultValue={`${e.price}`} style={style.borderStyle}/></div>
-                <div className="pt2 flex">USD {e.price*0.14}</div></div> 
-                </div>)})}
+            {orderBook}
           </div>
           <div className={`flex flex-column w-30 ${this.props.classes.borderStyle}`}>
             <div className={`flex items-center flex-column pt2`}>
